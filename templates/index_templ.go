@@ -8,7 +8,7 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func Index(count int) templ.Component {
+func Index(darkMode bool, item []int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,11 +29,15 @@ func Index(count int) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Gothh App</title><link href=\"css/style.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.2\"></script></head><body class=\"bg-black text-white flex flex-col\"><button hx-get=\"/count\" hx-target=\"#count\" hx-swap=\"innerHTML\">click to Count</button><div id=\"count\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Gothh App</title><link href=\"css/style.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.2\"></script></head><body class=\"h-screen bg-black text-white flex flex-col justify-center items-center \"><div id=\"main-content\" class=\"relative z-10 w-full h-full\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Counter(count).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Welcome(darkMode, item).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = Home(darkMode, item).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

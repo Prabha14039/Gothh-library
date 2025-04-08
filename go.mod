@@ -8,12 +8,14 @@ tool (
 	github.com/air-verse/air
 )
 
-require github.com/labstack/echo v3.3.10+incompatible
+require (
+	github.com/a-h/templ v0.3.857
+	github.com/labstack/echo v3.3.10+incompatible
+)
 
 require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/a-h/parse v0.0.0-20250122154542-74294addb73e // indirect
-	github.com/a-h/templ v0.3.857 // indirect
 	github.com/air-verse/air v1.61.7 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/bep/godartsass v1.2.0 // indirect

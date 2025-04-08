@@ -11,21 +11,23 @@ type Count struct {
 }
 
 func main(){
+
+	darkMode := true
+
+	var items []int =  []int {1,2,3,4,5,6}
 	e := echo.New()
 	e.Use(middleware.Logger())
 
-	count := Count {Count :0}
-
 	e.GET("/", func (c echo.Context) error{
-		return templates.Index(count.Count).Render(c.Request().Context(),c.Response().Writer)
+		return templates.Index(darkMode,items).Render(c.Request().Context(),c.Response().Writer)
 	})
 
-	e.GET("/count", func (c echo.Context) error{
-		count.Count++
-		return templates.Counter(count.Count).Render(c.Request().Context(),c.Response().Writer)
+	e.GET("/home", func (c echo.Context) error{
+		return templates.Home(darkMode,items).Render(c.Request().Context(),c.Response().Writer)
 	})
 
 	e.Static("/css","css")
+	e.Static("/static","static")
 	e.Logger.Fatal(e.Start(":8080"))
 
 }
