@@ -1,0 +1,9 @@
+package templates
+
+import "strconv"
+
+templ Counter (count int) {
+    <div>
+        { "Count :" + strconv.Itoa(count)}
+    </div>
+}
