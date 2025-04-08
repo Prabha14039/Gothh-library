@@ -1,5 +1,6 @@
 tmp/*
-go.sum/*
+go.sum
 main.txt
 tailwindcss
+
 
