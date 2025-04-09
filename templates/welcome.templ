@@ -1,29 +1,28 @@
 package templates
 
-templ Welcome(darkMode bool, items []int) {
-    <div class="fade-transition">
-	<div class="fixed inset-0 bg-black/50 backdrop-blur-md z-40"></div>
-	    <div class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 transition-all duration-700 opacity-100 scale-100">
-		<div class="place-content-evenly flex flex-row p-8 text-center bg-gradient-to-b from-gray-900 to-black border-0 shadow-[0_0_25px_rgba(128,0,128,0.3)] rounded-xl max-w-md overflow-hidden relative">
-			<div class="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-gray-900/20 opacity-50"></div>
-			<div class="flex flex-col justify-center items-center relative z-10">
-				<h2 class="text-3xl font-gothic mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-300 animate-pulse">
-					Welcome to the Goth Gallery
-				</h2>
-				<button
-					class="w-fit mt-1 border border-purple-700/50 bg-black/50 text-purple-300 hover:bg-purple-950/30 hover:text-purple-200 transition-all duration-300 px-4 py-2 rounded-lg"
-					hx-get="/home"
-					hx-target="#main-content"
-					hx-swap="outerHTML transition:true"
-				>
-					Enter Gallery
-
-				</button>
-			</div>
-			<div class="inline-block p-2 rounded-lg bg-gradient-to-r from-black-500/30 to-gray-500/30 ">
-				<img src="static/Gothwelcome.jpg?height=180&width=180" alt="Gothic art" class="mx-auto rounded-md object-cover w-[200px] h-[150px]"/>
+templ Welcome(darkMode bool) {
+	<div class="fade-transition">
+		<div class="fixed inset-0 bg-black/50 backdrop-blur-md z-40"></div>
+		<div class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 transition-all duration-700 opacity-100 scale-100">
+			<div class="place-content-evenly flex flex-row p-8 text-center bg-gradient-to-b from-gray-900 to-black border-0 shadow-[0_0_25px_rgba(128,0,128,0.3)] rounded-xl max-w-md overflow-hidden relative">
+				<div class="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-gray-900/20 opacity-50"></div>
+				<div class="flex flex-col justify-center items-center relative z-10">
+					<h2 class="text-3xl font-gothic mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-300 animate-pulse">
+						Welcome to the Goth Gallery
+					</h2>
+					<button
+						class="w-fit mt-1 border border-purple-700/50 bg-black/50 text-purple-300 hover:bg-purple-950/30 hover:text-purple-200 transition-all duration-300 px-4 py-2 rounded-lg"
+						hx-get="/home"
+						hx-target="#main-content"
+						hx-swap="outerHTML transition:true"
+					>
+						Enter Gallery
+					</button>
+				</div>
+				<div class="inline-block p-2 rounded-lg bg-gradient-to-r from-black-500/30 to-gray-500/30 ">
+					<img src="static/Gothwelcome.jpg?height=180&width=180" alt="Gothic art" class="mx-auto rounded-md object-cover w-[200px] h-[150px]"/>
+				</div>
 			</div>
 		</div>
 	</div>
-    </div>
 }

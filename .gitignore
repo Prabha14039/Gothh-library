@@ -4,5 +4,5 @@ main.txt
 tailwindcss
 views/*
 templates/*.go
-
+.env
 
