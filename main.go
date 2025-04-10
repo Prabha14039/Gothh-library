@@ -41,6 +41,7 @@ func main() {
 			log.Println("Error fetching images:", err)
 			return c.String(500, "Error fetching images")
 		}
+
 		return templates.Index(darkMode, images).Render(c.Request().Context(), c.Response().Writer)
 	})
 

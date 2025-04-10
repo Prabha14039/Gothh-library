@@ -220,7 +220,7 @@ func Home(darkMode bool, images []helpers.Images) templ.Component {
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><button style=\"position: fixed; bottom: 20px; right: 20px; z-index: 10; background-color: red; padding: 10px; border-radius: 8px; color: white; font-weight: bold; font-size: 18px; cursor: pointer;\">Click here</button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

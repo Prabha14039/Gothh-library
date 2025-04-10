@@ -2,7 +2,6 @@ tmp/*
 go.sum
 main.txt
 tailwindcss
-views/*
 templates/*.go
 .env
 

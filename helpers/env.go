@@ -19,8 +19,8 @@ func FetchEnv() string {
 	dbName := os.Getenv("DB_NAME")
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
-	// Default to disable if not specified
 	sslMode := os.Getenv("SSL_MODE")
+
 	if sslMode == "" {
 		sslMode = "disable"
 	}
