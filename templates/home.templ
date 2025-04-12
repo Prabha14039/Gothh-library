@@ -4,96 +4,21 @@ import (
     "Gothh/helpers"
 )
 
-templ LargeCard(image helpers.Images) {
-    <div class="card card_large">
-        <img src={image.Url} alt={image.Name} />
-    </div>
-}
-
-templ MediumCard(image helpers.Images) {
-    <div class="card card_medium">
-        <img src={image.Url} alt={image.Name} />
-    </div>
-}
-
-templ SmallCard(image helpers.Images) {
-    <div class="card card_small">
-        <img src={image.Url} alt={image.Name} />
-    </div>
-}
-
 templ Home(darkMode bool, images []helpers.Images) {
-        <div class="pin_container">
-
-    <style>
-
-        :root {
-            --card_width: 450px;
-            --card_border_radius: 16px;
-            --card_small: 26;
-            --card_medium: 33;
-            --card_large: 25;
-        }
-
-    .pin_container {
-            width: 80vw;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            display: grid;
-            grid-template-columns: repeat(auto-fill, var(--card_width));
-            grid-auto-rows: var(--row_increment);
-            justify-content: center;
-        }
-
-    .card {
-        margin: 15px 10px;
-        border-radius: var(--card_border_radius);
-        background-color: #f4f4f4;
-        overflow: hidden;
-    }
-
-    .card_small {
-        grid-row-end: span var(--card_small);
-    }
-
-    .card_medium {
-        grid-row-end: span var(--card_medium);
-    }
-
-    .card_large {
-        grid-row-end: span var(--card_large);
-    }
-
-    .card img {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    .card h3, .card p {
-        margin: 8px 12px;
-    }
-    </style>
-        for i, image := range images {
-            if i % 3 == 0 {
-                @LargeCard(image)
-            } else if i % 2 == 0 {
-                @SmallCard(image)
-            } else {
-                @MediumCard(image)
-            }
+    <div id="home-container" class="pin-container columns-4">
+        for _, item := range images {
+            <div id="box" class="w-full mb-10px break-inside-avoid">
+                <img class="max-w-full rounded-xl" src={item.Url} alt={item.Name}>
+            </div>
         }
     </div>
-   	<button style="position: fixed; bottom: 20px; right: 20px; z-index: 10; background-color: red; padding: 10px; border-radius: 8px; color: white; font-weight: bold; font-size: 18px; cursor: pointer;">
-		Click here
-	</button>
+
+    <button id="Upload" hx-get="/home/upload" hx-target="#response" hx-swap="outerHTML" class="fixed bottom-4 right-4 text-white bg-gray-700 p-2 rounded-lg font-bold">
+        Upload
+    </button>
+
+    <div id="response" hidden="hidden"> </div>
 }
 
-func ternary(value bool, a string, b string) string {
-    if value {
-        return a
-    }
-    return b
-}
+
 

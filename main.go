@@ -14,7 +14,9 @@ import (
 
 func main() {
 
-	dsn := helpers.FetchEnv()
+	key := helpers.FetchEnv()
+
+	dsn := "user=" + key.DbUser + " password=" + key.DbPassword + " dbname=" + key.DbName + " host=" + key.DbHost + " port=" + key.DbPort + " sslmode=" + key.SslMode
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -53,6 +55,14 @@ func main() {
 			return c.String(500, "Error fetching images")
 		}
 		return templates.Home(darkMode, images).Render(c.Request().Context(), c.Response().Writer)
+	})
+
+	e.GET("/home/upload" , func (c echo.Context) error {
+		return templates.UploadButton().Render(c.Request().Context(),c.Response().Writer)
+	})
+
+	e.POST("/uploads", func(c echo.Context) error {
+		return helpers.PrepareUpload(c)
 	})
 
 	e.Static("/css", "css")

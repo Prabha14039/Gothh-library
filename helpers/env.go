@@ -7,24 +7,37 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func FetchEnv() string {
+type Key struct {
+	UploadThing_Key string
+	DbUser string
+	DbPassword string
+	DbName string
+	DbHost string
+	DbPort string
+	SslMode string
+}
+
+func FetchEnv() Key {
 	err := godotenv.Load(".env")
 
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	sslMode := os.Getenv("SSL_MODE")
+	var key Key
 
-	if sslMode == "" {
-		sslMode = "disable"
+	key.DbUser = os.Getenv("DB_USER")
+	key.DbPassword = os.Getenv("DB_PASSWORD")
+	key.DbName = os.Getenv("DB_NAME")
+	key.DbHost = os.Getenv("DB_HOST")
+	key.DbPort = os.Getenv("DB_PORT")
+	key.SslMode = os.Getenv("SSL_MODE")
+	key.UploadThing_Key = os.Getenv("UPLOAD_THING_KEY")
+
+	if key.SslMode == "" {
+		key.SslMode = "disable"
 	}
 
-	dsn := "user=" + dbUser + " password=" + dbPassword + " dbname=" + dbName + " host=" + dbHost + " port=" + dbPort + " sslmode=" + sslMode
-	return dsn
+	return key;
+
 }

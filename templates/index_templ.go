@@ -31,15 +31,11 @@ func Index(darkMode bool, images []helpers.Images) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Gothh App</title><link href=\"css/style.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.2\"></script></head><body class=\"bg-black\"><div id=\"crumbs\" class=\"text-2xl flex flex-row relative border-b p-2 font-bold text-white\"><h1>Goth Gallery</h1><h1 class=\"absolute right-2\">Sign Out</h1></div><div id=\"main-content\" class=\"relative z-10 w-full h-full\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Gothh App</title><link href=\"css/style.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.2\"></script></head><body class=\"bg-black\"><div id=\"crumbs\" class=\"text-2xl flex flex-row relative border-b p-3 font-bold text-white\"><h1>Goth Gallery</h1><h1 class=\"absolute right-2\">Sign Out</h1></div><div id=\"main-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = Welcome(darkMode).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = Home(darkMode, images).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
