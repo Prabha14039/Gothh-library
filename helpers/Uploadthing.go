@@ -1,59 +1,102 @@
 package helpers
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
-	"os"
 	"github.com/labstack/echo"
 )
 
-func UploadFiles() {
+type PresignedResponse struct {
+	Data []struct {
+		Key string					`json:"key"`
+		Fields map[string]string	`json:"fileds"`
+		FileUrl string				`json:"fileUrl"`
+		URL string					`json:"url"`
+	} `json:"data"`
+}
 
-	var key Key
+type UploadRequest struct {
+	Fileinfo []File				`json:"files"`
+	Acl string 					`json:"acl"`
+	Metadata *string				`json:"metadata"`
+	ContentDisposition string	`json:"contentDisposition"`
+}
+
+type File struct {
+	Name string			`json:"name"`
+	Size int			`json:"size"`
+	CustomId *string
+	Type string			`json:"type"`
+}
+
+
+func uploadFiles(request UploadRequest) error{
+
+	key := FetchEnv()
 
 	url := "https://api.uploadthing.com/v6/uploadFiles"
 
-	payload := strings.NewReader("{\n  \"files\": [\n    {\n      \"name\": \"\",\n      \"size\": 1,\n      \"type\": \"\",\n      \"customId\": null\n    }\n  ],\n  \"acl\": \"public-read\",\n  \"metadata\": null,\n  \"contentDisposition\": \"inline\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
+	payload, err := json.Marshal(request)
+	if err!=nil {
+		return err
+	}
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(payload))
+	if err!= nil {
+		return err
+	}
 
 	req.Header.Add("X-Uploadthing-Api-Key", key.UploadThing_Key)
+	req.Header.Set("Content-Type", "application/json")
 
 	res, _ := http.DefaultClient.Do(req)
 
 	defer res.Body.Close()
+
 	body, _ := io.ReadAll(res.Body)
 
-	fmt.Println(res)
-	fmt.Println(string(body))
+	fmt.Println("Status:", res.Status)
+	fmt.Println("Response Body:", string(body))
+
+	return nil
 
 }
 
 func PrepareUpload(c echo.Context) error {
 
+
+	var Fileinfo File
 	file, err := c.FormFile("file")
 	if err != nil {
 		return err
 	}
+
 	src, err := file.Open()
 	if err != nil {
 		return err
 	}
+
 	defer src.Close()
 
-	// Destination
-	dst, err := os.Create("uploads/" + file.Filename)
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
+	Fileinfo.Name = file.Filename
+	Fileinfo.Size = int(file.Size)
+	Fileinfo.Type = file.Header.Get("Content-Type")
 
-	// Copy
-	if _, err = io.Copy(dst, src); err != nil {
-		return err
+	uploadbody := UploadRequest {
+		Fileinfo: []File {
+			{
+			Name : Fileinfo.Name,
+			Size : Fileinfo.Size,
+			CustomId : nil,
+			Type : Fileinfo.Type,
+			},
+		},
+		Acl : "public-read",
+		Metadata: nil,
+		ContentDisposition: "inline",
 	}
 
-	return c.HTML(http.StatusOK, fmt.Sprintf("<p>File %s uploaded successfully </p>", file.Filename))
+	return uploadFiles(uploadbody)
 }
