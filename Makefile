@@ -32,5 +32,5 @@ migrate: db-start
 
 # Run the app (assumes `go run main.go` works)
 .PHONY: run
-run:
-	air
+run: db-start
+	./build/myApp
