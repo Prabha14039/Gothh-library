@@ -69,7 +69,7 @@ func Home(darkMode bool, images []helpers.Images) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><button id=\"Upload\" hx-get=\"/home/upload\" hx-target=\"#response\" hx-swap=\"outerHTML\" class=\"fixed bottom-4 right-4 text-white bg-gray-700 p-2 rounded-lg font-bold\">Upload</button><div id=\"response\" hidden=\"hidden\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><button id=\"Upload\" hx-get=\"/home/upload\" hx-target=\"#response\" hx-swap=\"outerHTML\" class=\"fixed bottom-4 right-4 text-white bg-gray-700 p-2 rounded-lg font-bold z-10\">Upload</button><div id=\"response\" hidden=\"hidden\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

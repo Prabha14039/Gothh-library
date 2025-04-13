@@ -61,7 +61,7 @@ func main() {
 		return templates.UploadButton().Render(c.Request().Context(),c.Response().Writer)
 	})
 
-	e.POST("/uploads", helpers.PrepareUpload)
+	e.POST("/uploads", helpers.Upload)
 
 	e.Static("/css", "css")
 	e.Static("/static", "static")

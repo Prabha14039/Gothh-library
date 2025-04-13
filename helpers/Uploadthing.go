@@ -3,18 +3,24 @@ package helpers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"github.com/labstack/echo"
 )
 
-type PresignedResponse struct {
+type UploadThingResponse struct {
 	Data []struct {
-		Key string					`json:"key"`
-		Fields map[string]string	`json:"fileds"`
-		FileUrl string				`json:"fileUrl"`
-		URL string					`json:"url"`
+		Key               string            `json:"key"`
+		FileName          string            `json:"fileName"`
+		FileType          string            `json:"fileType"`
+		FileUrl           string            `json:"fileUrl"`
+		ContentDisposition string           `json:"contentDisposition"`
+		PollingJwt        string            `json:"pollingJwt"`
+		PollingUrl        string            `json:"pollingUrl"`
+		CustomId          string            `json:"customId"`
+		URL               string            `json:"url"`
+		Fields			  map[string]string `json:"fields"`
 	} `json:"data"`
 }
 
@@ -33,70 +39,128 @@ type File struct {
 }
 
 
-func uploadFiles(request UploadRequest) error{
-
+func prepareUpload(request UploadRequest, ch chan UploadThingResponse) {
 	key := FetchEnv()
-
 	url := "https://api.uploadthing.com/v6/uploadFiles"
 
 	payload, err := json.Marshal(request)
-	if err!=nil {
-		return err
+	if err != nil {
+		log.Printf("Error marshaling request: %v", err)
+		return
 	}
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(payload))
-	if err!= nil {
-		return err
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
+	if err != nil {
+		log.Printf("Error creating request: %v", err)
+		return
 	}
 
 	req.Header.Add("X-Uploadthing-Api-Key", key.UploadThing_Key)
 	req.Header.Set("Content-Type", "application/json")
 
-	res, _ := http.DefaultClient.Do(req)
-
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Printf("HTTP request failed: %v", err)
+		return
+	}
 	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("Error reading response body: %v", err)
+		return
+	}
 
-	fmt.Println("Status:", res.Status)
-	fmt.Println("Response Body:", string(body))
+	var response UploadThingResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		log.Printf("Error unmarshalling response: %v", err)
+		return
+	}
 
-	return nil
+	log.Printf(string(body))
 
+	log.Printf("Received upload URL: %s", response.Data[0].URL)
+	ch <- response
 }
 
-func PrepareUpload(c echo.Context) error {
+func uploadFiles(value []byte, url string, content_type string) {
+
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(value))
+	if err != nil {
+		log.Printf("Error creating PUT request: %v", err)
+		return
+	}
+
+	req.Header.Set("Content-Type",content_type)
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Printf("File upload failed: %v", err)
+		return
+	}
+	defer res.Body.Close()
+
+	log.Printf("File uploaded successfully. Status: %s", res.Status)
+}
 
 
-	var Fileinfo File
+func Upload(c echo.Context) error {
+	var fileInfo File
 	file, err := c.FormFile("file")
 	if err != nil {
+		c.Logger().Error("File not found in form data: ", err)
 		return err
 	}
 
 	src, err := file.Open()
 	if err != nil {
+		c.Logger().Error("Failed to open file: ", err)
+		return err
+	}
+	defer src.Close()
+
+	fileData, err := io.ReadAll(src)
+	if err != nil {
+		c.Logger().Error("Failed to read file: ", err)
 		return err
 	}
 
-	defer src.Close()
+	fileInfo.Name = file.Filename
+	fileInfo.Size = int(file.Size)
+	fileInfo.Type = file.Header.Get("Content-Type")
 
-	Fileinfo.Name = file.Filename
-	Fileinfo.Size = int(file.Size)
-	Fileinfo.Type = file.Header.Get("Content-Type")
-
-	uploadbody := UploadRequest {
-		Fileinfo: []File {
+	uploadBody := UploadRequest{
+		Fileinfo: []File{
 			{
-			Name : Fileinfo.Name,
-			Size : Fileinfo.Size,
-			CustomId : nil,
-			Type : Fileinfo.Type,
+				Name:     fileInfo.Name,
+				Size:     fileInfo.Size,
+				CustomId: nil,
+				Type:     fileInfo.Type,
 			},
 		},
-		Acl : "public-read",
-		Metadata: nil,
+		Acl:                "public-read",
+		Metadata:           nil,
 		ContentDisposition: "inline",
 	}
 
-	return uploadFiles(uploadbody)
+	uploadURL := make(chan UploadThingResponse)
+	go prepareUpload(uploadBody, uploadURL)
+
+	value := <-uploadURL
+	if len(value.Data) == 0 {
+		c.Logger().Error("UploadThing response is empty")
+		return echo.NewHTTPError(http.StatusInternalServerError, "upload failed")
+	}
+
+	url := value.Data[0].URL
+	log.Printf("Uploading file to %s", url)
+
+	content_type := value.Data[0].Fields["Content-Type"]
+
+	log.Printf("%s", content_type)
+	uploadFiles(fileData, url, content_type)
+
+	log.Printf("Upload completed.")
+	return nil
 }
+
