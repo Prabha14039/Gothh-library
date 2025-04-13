@@ -5,38 +5,13 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"path/filepath"
+
 	"github.com/labstack/echo"
 )
 
-type UploadThingResponse struct {
-	Data []struct {
-		Key               string            `json:"key"`
-		FileName          string            `json:"fileName"`
-		FileType          string            `json:"fileType"`
-		FileUrl           string            `json:"fileUrl"`
-		ContentDisposition string           `json:"contentDisposition"`
-		PollingJwt        string            `json:"pollingJwt"`
-		PollingUrl        string            `json:"pollingUrl"`
-		CustomId          string            `json:"customId"`
-		URL               string            `json:"url"`
-		Fields			  map[string]string `json:"fields"`
-	} `json:"data"`
-}
-
-type UploadRequest struct {
-	Fileinfo []File				`json:"files"`
-	Acl string 					`json:"acl"`
-	Metadata *string				`json:"metadata"`
-	ContentDisposition string	`json:"contentDisposition"`
-}
-
-type File struct {
-	Name string			`json:"name"`
-	Size int			`json:"size"`
-	CustomId *string
-	Type string			`json:"type"`
-}
 
 
 func prepareUpload(request UploadRequest, ch chan UploadThingResponse) {
@@ -77,35 +52,57 @@ func prepareUpload(request UploadRequest, ch chan UploadThingResponse) {
 		return
 	}
 
-	log.Printf(string(body))
-
 	log.Printf("Received upload URL: %s", response.Data[0].URL)
 	ch <- response
 }
 
-func uploadFiles(value []byte, url string, content_type string) {
+func uploadFiles(value []byte, Response UploadThingResponse) {
 
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(value))
+	Data := Response.Data[0]
+	Fields := Data.Fields
+	var buf bytes.Buffer
+
+	writer := multipart.NewWriter(&buf)
+
+	for key, val := range Fields {
+		err := writer.WriteField(key,val)
+		if err != nil {
+			log.Println("Error adding value : %s with error : %v",key,err)
+		}
+	}
+
+	filename := filepath.Base(Fields["key"])
+
+	FieldForm , err:= writer.CreateFormFile("file",filename)
+
+	FieldForm.Write(value)
+
+	_ = writer.Close()
+
+	req, err := http.NewRequest("POST", Response.Data[0].URL, &buf)
 	if err != nil {
 		log.Printf("Error creating PUT request: %v", err)
 		return
 	}
 
-	req.Header.Set("Content-Type",content_type)
+	req.Header.Set("Content-Type",writer.FormDataContentType())
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Printf("File upload failed: %v", err)
 		return
 	}
+
 	defer res.Body.Close()
 
-	log.Printf("File uploaded successfully. Status: %s", res.Status)
+	log.Printf("Upload finished. Status: %s", res.Status) // if this prints 204 then taht means it was succesful
 }
 
 
 func Upload(c echo.Context) error {
+
 	var fileInfo File
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.Logger().Error("File not found in form data: ", err)
@@ -117,6 +114,7 @@ func Upload(c echo.Context) error {
 		c.Logger().Error("Failed to open file: ", err)
 		return err
 	}
+
 	defer src.Close()
 
 	fileData, err := io.ReadAll(src)
@@ -129,7 +127,10 @@ func Upload(c echo.Context) error {
 	fileInfo.Size = int(file.Size)
 	fileInfo.Type = file.Header.Get("Content-Type")
 
-	uploadBody := UploadRequest{
+
+	uploadResponse := make(chan UploadThingResponse)
+
+	var uploadBody UploadRequest = UploadRequest{
 		Fileinfo: []File{
 			{
 				Name:     fileInfo.Name,
@@ -143,22 +144,16 @@ func Upload(c echo.Context) error {
 		ContentDisposition: "inline",
 	}
 
-	uploadURL := make(chan UploadThingResponse)
-	go prepareUpload(uploadBody, uploadURL)
+	go prepareUpload(uploadBody, uploadResponse) //Preparing upload
 
-	value := <-uploadURL
+	value := <-uploadResponse
+
 	if len(value.Data) == 0 {
 		c.Logger().Error("UploadThing response is empty")
 		return echo.NewHTTPError(http.StatusInternalServerError, "upload failed")
 	}
 
-	url := value.Data[0].URL
-	log.Printf("Uploading file to %s", url)
-
-	content_type := value.Data[0].Fields["Content-Type"]
-
-	log.Printf("%s", content_type)
-	uploadFiles(fileData, url, content_type)
+	uploadFiles(fileData ,value) // uploadingFiles
 
 	log.Printf("Upload completed.")
 	return nil
