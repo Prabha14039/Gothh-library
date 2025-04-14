@@ -22,25 +22,22 @@ FROM golang:1.24-alpine AS development
 
 RUN apk add --no-cache make git curl
 
-
 COPY --from=builder /go/bin/air /usr/local/bin/air
 COPY --from=builder /go/bin/goose /usr/local/bin/goose
 
 WORKDIR /app
 
 COPY go.mod go.sum ./
-RUN go mod download
 
 COPY . .
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+RUN go mod download
 
 EXPOSE 8080
 
 ENV PATH="/root/go/bin:${PATH}"
 
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["air"]
+CMD ["sh", "-c", "goose -dir db postgres \"host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} sslmode=disable\" up && air"]
 
 #production stage
 FROM golang:1.24-alpine AS production
@@ -55,17 +52,15 @@ COPY --from=builder /go/bin/goose /usr/local/bin/goose
 WORKDIR /app
 
 COPY go.mod go.sum ./
-RUN go mod download
 
 COPY . .
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+RUN go mod download
 
 EXPOSE 8080
 
 ENV PATH="/root/go/bin:${PATH}"
 
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["make" , "run"]
+CMD ["sh", "-c", "goose -dir db postgres \"host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} sslmode=require\" up && make run"]
 
 

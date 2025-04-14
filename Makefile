@@ -3,14 +3,11 @@ ifneq (,$(wildcard .env))
     export
 endif
 
-.PHONY: start dev dev-build stop prod prod-build
+.PHONY: start dev dev-build stop prod prod-build 
 
 start:
 	@echo "📦 Starting database services..."
 	@docker-compose up -d postgres pgadmin
-
-migrate:
-	@goose -dir db postgres "host=${DB_HOST} user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable" up
 
 dev-build: start
 	@echo "Starting the app build !!!"
@@ -27,7 +24,8 @@ dev: dev-build
 
 prod: prod-build
 	@echo "Starting development environment..."
-	docker-compose up prod
+	@docker-compose up prod
+
 
 stop:
 	@docker-compose down

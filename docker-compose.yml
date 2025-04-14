@@ -25,13 +25,12 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
-      - SSL_MODE=disable
+      - SSL_MODE=require
       - UPLOAD_THING_KEY=${UPLOAD_THING_KEY}
     ports:
       - "8080:8080"
     volumes:
       - .:/app
-      - /app/node_modules
       - /app/tmp
     depends_on:
       - postgres
