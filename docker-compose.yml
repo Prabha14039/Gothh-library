@@ -23,7 +23,7 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
-      - DB_HOST=${DB_RAIWAY}
+      - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - SSL_MODE=disable
       - UPLOAD_THING_KEY=${UPLOAD_THING_KEY}
