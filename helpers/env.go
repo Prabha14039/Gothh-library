@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -9,20 +10,22 @@ import (
 
 type Key struct {
 	UploadThing_Key string
-	DbUser string
-	DbPassword string
-	DbName string
-	DbHost string
-	DbPort string
-	SslMode string
+	DbUser          string
+	DbPassword      string
+	DbName          string
+	DbHost          string
+	DbPort          string
+	SslMode         string
+}
+
+func init() {
+	err := godotenv.Load(".env")
+	if err!= nil {
+		fmt.Println("missing variables continue")
+	}
 }
 
 func FetchEnv() Key {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	var key Key
 
@@ -38,6 +41,10 @@ func FetchEnv() Key {
 		key.SslMode = "disable"
 	}
 
-	return key;
+	// Validate required environment variables
+	if key.DbUser == "" || key.DbPassword == "" || key.DbName == "" || key.DbHost == "" {
+		log.Fatal("Missing required environment variables")
+	}
 
+	return key
 }

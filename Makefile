@@ -20,7 +20,7 @@ migrate:
 
 dev-build: start
 	@echo "Starting the app build !!!"
-	@BUILD_TARGET=development docker-compose build app
+	@BUILD_TARGET=development docker-compose build app 
 
 prod-build: start
 	@echo "Starting the app build !!!"

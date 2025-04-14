@@ -20,13 +20,11 @@ services:
       target: ${BUILD_TARGET:-development}
     container_name: gothh_app
     env_file:
-      - ./.env
+      - .env
     environment:
-      - DB_HOST=gothpg
+      - DB_HOST=postgres
     ports:
       - "8080:8080"
-    volumes:
-      - .:/app
     depends_on:
       - postgres
 
