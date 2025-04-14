@@ -4,33 +4,46 @@ ifneq (,$(wildcard .env))
     export
 endif
 
-.PHONY: db-start
-db-start:
+.PHONY: start dev dev-build stop prod prod-build
+
+start:
 	@# Check if Docker is installed
 	@if ! command -v docker >/dev/null 2>&1; then \
 		echo "🚨 Docker is not installed. Please install Docker first."; \
 		exit 1; \
 	fi
+	@echo "📦 Starting database services..."
+	@docker-compose up -d postgres pgadmin
 
-	sudo docker-compose up -d
+migrate:
+	@goose -dir db postgres "host=gothpg user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable" up
 
+dev-build: start
+	@echo "Starting the app build !!!"
+	@BUILD_TARGET=development docker-compose build app
+
+prod-build: start
+	@echo "Starting the app build !!!"
+	@BUILD_TARGET=production docker-compose build app
+
+dev: dev-build
+	@echo "Starting development environment..."
+	@#First stop any existing app container to avoid conflicts
+	@docker-compose stop app || true
+	@#Then start the app container with the correct target
+	BUILD_TARGET=development docker-compose up app
+
+
+prod: prod-build
+	@echo "Starting development environment..."
+	@#First stop any existing app container to avoid conflicts
+	@docker-compose stop app || true
+	@#Then start the app container with the correct target
+	BUILD_TARGET=production docker-compose up app
 
 # Stop the container
-.PHONY: db-stop
-db-stop:
-	@sudo docker-compose down
+stop:
+	@docker-compose down
 
-# Remove the container
-.PHONY: db-clean
-db-clean:
-	sudo docker rm -f $(CONTAINER_NAME)
-
-# Run migrations using Goose (assumes goose is installed)
-.PHONY: migrate
-migrate: db-start
-	@goose -dir db postgres "host=$(DB_HOST) user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable" up
-
-# Run the app (assumes `go run main.go` works)
-.PHONY: run
-run: db-start
+run:
 	air
