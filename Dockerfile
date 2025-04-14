@@ -9,13 +9,12 @@ WORKDIR /app
 
 COPY go.mod go.sum ./
 
-# Download dependencies
 RUN go mod download
 
-# Copy the source code
 COPY . .
 
-# Build the application
+RUN templ generate
+
 RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -o main .
 
 # Development stage
@@ -43,6 +42,7 @@ ENV PATH="/root/go/bin:${PATH}"
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["air"]
 
+#production stage
 FROM golang:1.24-alpine AS production
 
 RUN apk add --no-cache make git curl
