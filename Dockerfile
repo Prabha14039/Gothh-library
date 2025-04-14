@@ -1,7 +1,8 @@
 FROM golang:1.24-alpine AS builder
 
-
 RUN go install github.com/air-verse/air@latest && go install github.com/pressly/goose/v3/cmd/goose@latest
+
+RUN go install github.com/a-h/templ/cmd/templ@latest
 
 WORKDIR /app
 
@@ -21,7 +22,6 @@ FROM golang:1.24-alpine AS development
 
 RUN apk add --no-cache make git curl
 
-RUN go install github.com/a-h/templ/cmd/templ@latest
 
 COPY --from=builder /go/bin/air /usr/local/bin/air
 COPY --from=builder /go/bin/goose /usr/local/bin/goose
