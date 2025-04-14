@@ -1,6 +1,5 @@
 tmp/*
 main.txt
 tailwindcss
-templates/*.go
 .env
 build/*
