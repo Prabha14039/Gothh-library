@@ -1,4 +1,3 @@
-# Load .env if it exists
 ifneq (,$(wildcard .env))
     include .env
     export
@@ -7,11 +6,6 @@ endif
 .PHONY: start dev dev-build stop prod prod-build
 
 start:
-	@# Check if Docker is installed
-	@if ! command -v docker >/dev/null 2>&1; then \
-		echo "🚨 Docker is not installed. Please install Docker first."; \
-		exit 1; \
-	fi
 	@echo "📦 Starting database services..."
 	@docker-compose up -d postgres pgadmin
 
@@ -20,28 +14,21 @@ migrate:
 
 dev-build: start
 	@echo "Starting the app build !!!"
-	@BUILD_TARGET=development docker-compose build app 
+	@docker-compose build dev
 
 prod-build: start
 	@echo "Starting the app build !!!"
-	@BUILD_TARGET=production docker-compose build app
+	@docker-compose build prod
 
 dev: dev-build
 	@echo "Starting development environment..."
-	@#First stop any existing app container to avoid conflicts
-	@docker-compose stop app || true
-	@#Then start the app container with the correct target
-	BUILD_TARGET=development docker-compose up app
+	@docker-compose up dev
 
 
 prod: prod-build
 	@echo "Starting development environment..."
-	@#First stop any existing app container to avoid conflicts
-	@docker-compose stop app || true
-	@#Then start the app container with the correct target
-	BUILD_TARGET=production docker-compose up app
+	docker-compose up prod
 
-# Stop the container
 stop:
 	@docker-compose down
 

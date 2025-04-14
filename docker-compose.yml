@@ -14,10 +14,32 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  app:
+  prod:
     build:
       context: .
-      target: ${BUILD_TARGET:-development}
+      target: production
+    container_name: gothh_app
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=postgres
+      - DB_PORT=${DB_PORT}
+      - SSL_MODE=disable
+      - UPLOAD_THING_KEY=${UPLOAD_THING_KEY}
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/tmp
+    depends_on:
+      - postgres
+
+  dev:
+    build:
+      context: .
+      target: development
     container_name: gothh_app
     env_file:
       - .env
@@ -40,6 +62,7 @@ services:
       - postgres
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+
 
 volumes:
   pgdata:
