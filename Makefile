@@ -10,7 +10,7 @@ start:
 	@docker-compose up -d postgres pgadmin
 
 migrate:
-	@goose -dir db postgres "host=gothpg user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable" up
+	@goose -dir db postgres "host=${DB_HOST} user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable" up
 
 dev-build: start
 	@echo "Starting the app build !!!"
