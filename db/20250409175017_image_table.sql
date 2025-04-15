@@ -10,5 +10,5 @@ CREATE TABLE images (
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+DROP TABLE IF EXISTS images;
 -- +goose StatementEnd

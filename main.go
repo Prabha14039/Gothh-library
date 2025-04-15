@@ -57,11 +57,18 @@ func main() {
 		return templates.Home(darkMode, images).Render(c.Request().Context(), c.Response().Writer)
 	})
 
-	e.GET("/home/upload" , func (c echo.Context) error {
-		return templates.UploadButton().Render(c.Request().Context(),c.Response().Writer)
+	e.GET("/home/upload", func(c echo.Context) error {
+		return templates.UploadButton().Render(c.Request().Context(), c.Response().Writer)
 	})
 
-	e.POST("/uploads", helpers.Upload)
+	e.POST("/uploads", func(c echo.Context) error {
+		err := helpers.Upload(c, db)
+		if err != nil {
+			log.Println("Error uploading file:", err)
+			return c.String(500, "Error uploading file")
+		}
+		return c.String(200, "File uploaded successfully")
+	})
 
 	e.Static("/css", "css")
 	e.Static("/static", "static")

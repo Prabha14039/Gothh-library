@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -11,8 +12,6 @@ import (
 
 	"github.com/labstack/echo"
 )
-
-
 
 func prepareUpload(request UploadRequest, ch chan UploadThingResponse) {
 	key := FetchEnv()
@@ -65,15 +64,15 @@ func uploadFiles(value []byte, Response UploadThingResponse) {
 	writer := multipart.NewWriter(&buf)
 
 	for key, val := range Fields {
-		err := writer.WriteField(key,val)
+		err := writer.WriteField(key, val)
 		if err != nil {
-			log.Println("Error adding value : %s with error : %v",key,err)
+			log.Println("Error adding value : %s with error : %v", key, err)
 		}
 	}
 
 	filename := filepath.Base(Fields["key"])
 
-	FieldForm , err:= writer.CreateFormFile("file",filename)
+	FieldForm, err := writer.CreateFormFile("file", filename)
 
 	FieldForm.Write(value)
 
@@ -85,7 +84,7 @@ func uploadFiles(value []byte, Response UploadThingResponse) {
 		return
 	}
 
-	req.Header.Set("Content-Type",writer.FormDataContentType())
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -98,8 +97,16 @@ func uploadFiles(value []byte, Response UploadThingResponse) {
 	log.Printf("Upload finished. Status: %s", res.Status) // if this prints 204 then taht means it was succesful
 }
 
+func updateDatabase(db *sql.DB, name string, url string) {
+	query := "INSERT INTO images (name, url) VALUES ($1, $2)"
+	_, err := db.Exec(query, name, url)
+	if err != nil {
+		log.Println("Error inserting image into database: ", err)
+		return
+	}
+}
 
-func Upload(c echo.Context) error {
+func Upload(c echo.Context, db *sql.DB) error {
 
 	var fileInfo File
 
@@ -127,7 +134,6 @@ func Upload(c echo.Context) error {
 	fileInfo.Size = int(file.Size)
 	fileInfo.Type = file.Header.Get("Content-Type")
 
-
 	uploadResponse := make(chan UploadThingResponse)
 
 	var uploadBody UploadRequest = UploadRequest{
@@ -153,9 +159,10 @@ func Upload(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "upload failed")
 	}
 
-	uploadFiles(fileData ,value) // uploadingFiles
+	uploadFiles(fileData, value) // uploadingFiles
+
+	updateDatabase(db, fileInfo.Name, value.Data[0].FileUrl)
 
 	log.Printf("Upload completed.")
 	return nil
 }
-
