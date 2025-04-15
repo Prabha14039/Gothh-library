@@ -3,7 +3,7 @@ ifneq (,$(wildcard .env))
     export
 endif
 
-.PHONY: start dev dev-build stop prod prod-build 
+.PHONY: start dev dev-build stop prod prod-build
 
 start:
 	@echo "📦 Starting database services..."
@@ -19,12 +19,12 @@ prod-build: start
 
 dev: dev-build
 	@echo "Starting development environment..."
-	@docker-compose up dev
+	@docker-compose up -d dev
 
 
 prod: prod-build
 	@echo "Starting development environment..."
-	@docker-compose up prod
+	@docker-compose up -d prod
 
 
 stop:
